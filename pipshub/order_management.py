@@ -380,6 +380,64 @@ if __name__ == "__main__":
             request_type=RequestType.New
         )
         oms.onData(late_req)
+        # --- Additional test scenarios ---
+        print("\n--- Additional Test Scenarios ---")
+        # 1. Order arriving exactly at the window boundary (should be accepted if within, rejected if after)
+        print("Testing order at window boundary...")
+        # Wait until just before logout
+        while (datetime.datetime.now().time() < END_TIME and oms.time_window.is_logged_in()):
+            time.sleep(0.05)
+        # Try to send at the boundary
+        boundary_order = OrderRequest(
+            m_symbolId=3,
+            m_price=123.45,
+            m_qty=10,
+            m_side='B',
+            m_orderId=4000,
+            request_type=RequestType.New
+        )
+        oms.onData(boundary_order)
+        # 2. Multiple modify/cancel on the same order
+        print("Testing multiple modify/cancel on same order...")
+        test_order = OrderRequest(
+            m_symbolId=4,
+            m_price=50.0,
+            m_qty=5,
+            m_side='S',
+            m_orderId=5000,
+            request_type=RequestType.New
+        )
+        oms.onData(test_order)
+        # Queue it by sending many at once
+        for i in range(MAX_ORDERS_PER_SEC):
+            oms.onData(OrderRequest(4, 51.0+i, 6+i, 'S', 5001+i, RequestType.New))
+        # Modify it twice
+        oms.onData(OrderRequest(4, 60.0, 7, 'S', 5000, RequestType.Modify))
+        oms.onData(OrderRequest(4, 70.0, 8, 'S', 5000, RequestType.Modify))
+        # Cancel it
+        oms.onData(OrderRequest(4, 0, 0, 'S', 5000, RequestType.Cancel))
+        # Try to modify after cancel
+        oms.onData(OrderRequest(4, 80.0, 9, 'S', 5000, RequestType.Modify))
+        # 3. Orders with duplicate IDs
+        print("Testing duplicate order IDs...")
+        dup_order1 = OrderRequest(5, 100.0, 10, 'B', 6000, RequestType.New)
+        dup_order2 = OrderRequest(5, 200.0, 20, 'S', 6000, RequestType.New)
+        oms.onData(dup_order1)
+        oms.onData(dup_order2)
+        # 4. Orders with invalid sides
+        print("Testing invalid order sides...")
+        invalid_side_order = OrderRequest(6, 100.0, 10, 'X', 7000, RequestType.New)
+        oms.onData(invalid_side_order)
+        # 5. Orders with zero/negative quantity or price
+        print("Testing zero/negative quantity/price...")
+        zero_qty_order = OrderRequest(7, 100.0, 0, 'B', 8000, RequestType.New)
+        neg_qty_order = OrderRequest(7, 100.0, -5, 'B', 8001, RequestType.New)
+        zero_price_order = OrderRequest(7, 0.0, 10, 'B', 8002, RequestType.New)
+        neg_price_order = OrderRequest(7, -10.0, 10, 'B', 8003, RequestType.New)
+        oms.onData(zero_qty_order)
+        oms.onData(neg_qty_order)
+        oms.onData(zero_price_order)
+        oms.onData(neg_price_order)
 
     # Run simulation in a thread so OMS can process in background
     sim_thread = threading.Thread(target=simulate_orders)
