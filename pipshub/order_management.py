@@ -317,16 +317,66 @@ if __name__ == "__main__":
             request_type=RequestType.Cancel
         )
         oms.onData(cancel_req)
+        # Edge case: Modify an order not in queue
+        mod_not_in_queue = OrderRequest(
+            m_symbolId=1,
+            m_price=111.1,
+            m_qty=1,
+            m_side='B',
+            m_orderId=9999,
+            request_type=RequestType.Modify
+        )
+        oms.onData(mod_not_in_queue)
+        # Edge case: Cancel an order not in queue
+        cancel_not_in_queue = OrderRequest(
+            m_symbolId=1,
+            m_price=0,
+            m_qty=0,
+            m_side='B',
+            m_orderId=8888,
+            request_type=RequestType.Cancel
+        )
+        oms.onData(cancel_not_in_queue)
+        # Edge case: Multiple modifies before send
+        mod1 = OrderRequest(
+            m_symbolId=1,
+            m_price=120.0,
+            m_qty=50,
+            m_side='B',
+            m_orderId=1003,
+            request_type=RequestType.Modify
+        )
+        mod2 = OrderRequest(
+            m_symbolId=1,
+            m_price=130.0,
+            m_qty=60,
+            m_side='B',
+            m_orderId=1003,
+            request_type=RequestType.Modify
+        )
+        oms.onData(mod1)
+        oms.onData(mod2)
+        # Edge case: Rapid burst of orders (should queue and throttle)
+        for i in range(10):
+            req = OrderRequest(
+                m_symbolId=2,
+                m_price=200.0 + i,
+                m_qty=20 + i,
+                m_side='S',
+                m_orderId=2000 + i,
+                request_type=RequestType.New
+            )
+            oms.onData(req)
         # Send an order outside the window (wait for logout)
         print("Waiting for logout window...")
         while oms.time_window.is_logged_in():
             time.sleep(0.1)
         late_req = OrderRequest(
             m_symbolId=1,
-            m_price=200.0,
+            m_price=300.0,
             m_qty=1,
             m_side='S',
-            m_orderId=2000,
+            m_orderId=3000,
             request_type=RequestType.New
         )
         oms.onData(late_req)
