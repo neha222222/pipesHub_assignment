@@ -1,6 +1,6 @@
-# Order Management System (OMS) for PipesHub Assignment
+# Order Management System (OMS) 
 
-## 👋 Introduction (A Human Touch)
+## 👋 Introduction
 Welcome! This is not just another assignment solution—this is a thoughtfully crafted, real-world-inspired Order Management System (OMS) in Python. Imagine you're running a busy trading desk: orders come in bursts, some need to be changed or cancelled, and you can only send so many per second. This OMS is your diligent assistant, handling all the chaos with calm, logic, and a dash of personality.
 
 ## 🚀 What Does This OMS Do?
@@ -17,7 +17,7 @@ Think of the OMS as a nightclub bouncer:
 - The **queue** is the line outside. If you want to change your mind (modify) or leave (cancel) before you get in, you can.
 - The **logger** is the security camera, recording every entry and exit with a timestamp.
 
-## 🛠️ Features (With a Human Twist)
+## 🛠️ Features 
 - **Configurable Trading Window:** Set your own open/close times.
 - **Order Throttling:** No more than X orders per second—no exceptions!
 - **Queue Management:** Modify or cancel queued orders before they're sent.
@@ -99,6 +99,3 @@ Response for 1000: Accept, Latency: 50.12 ms
 Order 3000 rejected: Not in allowed time window.
 Test complete. Check responses.log for output.
 ```
-
-## 📚 License
-This project is for assignment/demo purposes only. If you use it, give it a star and let me know! 
